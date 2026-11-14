@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VITAE · Longevity Science — Own the science that slows aging</title>
+<meta name="description" content="DeSci is turning biotech IP into liquid assets. The research that used to live behind lab doors now trades.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#faf9f5; --ink:#1b1b18; --muted:#5f5f58; --faint:#9a9a90;
+    --accent:#0a7a4d; --accent2:#0c8a58; --hairline:#e7e3d8;
+    --serif:"Source Serif 4",Georgia,serif;
+    --display:"Playfair Display",Georgia,serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--paper);color:var(--ink);font-family:var(--serif);-webkit-font-smoothing:antialiased;line-height:1.65}
+  a{color:inherit;text-decoration:none}
+  .container{max-width:840px;margin:0 auto;padding:0 24px}
+  .container--wide{max-width:1040px}
+  .rv{opacity:0;transform:translateY(16px);transition:opacity .8s ease,transform .8s ease}
+  .rv.in{opacity:1;transform:none}
+  [id]{scroll-margin-top:70px}
+
+  .progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:60}
+
+  .nav{position:sticky;top:0;z-index:50;background:rgba(250,249,245,.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--hairline)}
+  .nav__inner{display:flex;align-items:center;justify-content:space-between;height:58px}
+  .brand{font-family:var(--display);font-weight:600;letter-spacing:.28em;font-size:15px}
+  .brand small{display:block;font-family:var(--serif);font-weight:400;font-size:9.5px;letter-spacing:.32em;color:var(--faint);text-transform:uppercase}
+  .nav__links{display:flex;align-items:center;gap:26px;list-style:none}
+  .nav__links a{font-size:13.5px;color:var(--muted);transition:color .2s}
+  .nav__links a:hover{color:var(--ink)}
+  .nav__links .nav__cta{color:var(--accent);border-bottom:1px solid var(--accent);padding-bottom:2px}
+
+  .hero{padding:96px 0 40px;text-align:center}
+  .eyebrow{font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--accent);margin-bottom:22px}
+  .hero__title{font-family:var(--display);font-weight:600;font-size:clamp(34px,5.4vw,60px);line-height:1.12;letter-spacing:-.01em}
+  .hero__title em{font-style:italic}
+  .hero__dek{font-size:19px;line-height:1.65;color:var(--muted);margin:26px auto 0;max-width:52ch}
+  .hero__note{font-size:12.5px;color:var(--faint);margin-top:16px;font-style:italic}
+  .clock{max-width:520px;margin:30px auto 0;background:#fff;border:1px solid var(--hairline);border-top:2px solid var(--accent);padding:24px 26px;text-align:left;box-shadow:0 12px 32px rgba(10,122,77,.07)}
+  .clock__head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--hairline);padding-bottom:12px}
+  .clock__head>span:first-child{font-family:var(--display);font-weight:600;font-size:17px;color:var(--ink)}
+  .clock__tag{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint)}
+  .clock__ages{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:center;padding:22px 0 18px}
+  .clock__age{text-align:center}
+  .clock__age-num{font-family:var(--display);font-size:44px;font-weight:600;color:var(--muted);line-height:1}
+  .clock__age-num.is-bio{color:var(--accent)}
+  .clock__age-label{font-size:11.5px;color:var(--faint);margin-top:6px;display:block}
+  .clock__gap{text-align:center}
+  .clock__gap-num{font-family:var(--display);font-size:19px;font-weight:600;color:#b3541e}
+  .clock__gap-label{font-size:11px;color:var(--faint);display:block;max-width:12ch;line-height:1.4;margin:4px auto 0}
+  .clock__track{position:relative;height:8px;background:var(--hairline);border-radius:4px;margin:4px 0 8px}
+  .clock__zone{position:absolute;left:0;right:0;height:100%;border-radius:4px;background:linear-gradient(90deg,var(--hairline),rgba(10,122,77,.28))}
+  .clock__dot{position:absolute;left:78%;top:50%;width:16px;height:16px;transform:translate(-50%,-50%);border-radius:50%;background:var(--accent);border:3px solid #fff;box-shadow:0 0 0 1px var(--accent)}
+  .clock__scale{display:flex;justify-content:space-between;font-size:11px;color:var(--faint)}
+  .clock__foot{font-size:12.5px;color:var(--accent);font-style:italic;margin-top:14px;padding-top:14px;border-top:1px solid var(--hairline)}
+  .hero__ctas{display:flex;gap:16px;margin-top:30px;justify-content:center;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:15px;cursor:pointer;transition:.2s;border:none}
+  .btn--primary{background:var(--accent);color:#fff;padding:14px 30px;border-radius:2px}
+  .btn--primary:hover{background:var(--accent2)}
+  .btn--ghost{background:transparent;color:var(--ink);padding:14px 8px;border-bottom:1px solid var(--ink)}
+  .btn--ghost:hover{color:var(--accent);border-color:var(--accent)}
+
+  .rule{max-width:840px;margin:64px auto;padding:0 24px}
+  .rule hr{border:none;border-top:1px solid var(--hairline)}
+
+  .stats{display:flex;justify-content:center;gap:64px;text-align:center;flex-wrap:wrap}
+  .stat__num{font-family:var(--display);font-size:38px;font-weight:600;color:var(--accent)}
+  .stat__label{font-size:12.5px;color:var(--muted);margin-top:6px;max-width:22ch;line-height:1.5;margin-left:auto;margin-right:auto}
+
+  .section{padding:56px 0;text-align:center}
+  .section__label{font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--accent);margin-bottom:16px}
+  .section__title{font-family:var(--display);font-weight:600;font-size:clamp(26px,3.4vw,38px);line-height:1.15}
+  .section__lede{font-size:16.5px;color:var(--muted);margin:16px auto 0;max-width:54ch}
+
+  .explorer{max-width:720px;margin:44px auto 0;text-align:left}
+  .tabs{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid var(--hairline)}
+  .tab{background:none;border:none;border-bottom:2px solid transparent;padding:13px 18px;font-family:var(--serif);font-size:15px;color:var(--muted);cursor:pointer;transition:.2s}
+  .tab:hover{color:var(--ink)}
+  .tab.is-active{color:var(--accent);border-color:var(--accent)}
+  .panel{display:none;padding:30px 2px;animation:in .35s ease}
+  .panel.is-active{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .panel__stage{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent)}
+  .panel__title{font-family:var(--display);font-size:26px;font-weight:600;margin:8px 0 12px}
+  .panel__text{font-size:16px;color:var(--muted);line-height:1.7;max-width:56ch}
+  .panel__status{margin-top:18px;display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--accent);font-style:italic}
+  .panel__status::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent)}
+
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:44px;border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)}
+  .step{padding:30px 26px;border-left:1px solid var(--hairline);text-align:left}
+  .step:first-child{border-left:none}
+  .step__num{font-family:var(--display);font-size:34px;color:var(--accent);font-style:italic;line-height:1}
+  .step__title{font-family:var(--display);font-size:20px;font-weight:600;margin-top:12px}
+  .step__text{font-size:14.5px;color:var(--muted);margin-top:8px;line-height:1.6}
+
+  .papers{margin-top:44px;text-align:left;border:1px solid var(--hairline);background:#fff}
+  .paper{display:flex;gap:20px;padding:22px 24px;border-top:1px solid var(--hairline)}
+  .paper:first-child{border-top:none}
+  .paper__num{font-family:var(--display);font-style:italic;color:var(--accent);min-width:34px;font-size:18px}
+  .paper__title{font-family:var(--display);font-size:17px;font-weight:600;line-height:1.3}
+  .paper__meta{font-size:12.5px;color:var(--faint);margin-top:5px;font-style:italic}
+  .papers__foot{font-size:11.5px;color:var(--faint);padding:14px 24px;border-top:1px solid var(--hairline);font-style:italic}
+
+  .faq{margin-top:44px;text-align:left;border-top:1px solid var(--hairline)}
+  .faq details{border-bottom:1px solid var(--hairline)}
+  .faq summary{list-style:none;cursor:pointer;padding:20px 2px;font-family:var(--display);font-size:19px;font-weight:500;display:flex;justify-content:space-between;align-items:center;transition:.15s}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary::after{content:"+";color:var(--accent);font-size:24px;font-weight:400;transition:transform .2s}
+  .faq details[open] summary::after{transform:rotate(45deg)}
+  .faq summary:hover{color:var(--accent)}
+  .faq p{padding:0 0 20px;color:var(--muted);font-size:15px;line-height:1.7}
+
+  .report-form{display:flex;flex-direction:column;gap:0;margin-top:28px;max-width:520px;margin-left:auto;margin-right:auto;text-align:left}
+  .report-form input{background:transparent;border:none;border-bottom:1px solid var(--hairline);color:var(--ink);padding:14px 2px;font-size:16px;font-family:var(--serif)}
+  .report-form input::placeholder{color:var(--faint);font-style:italic}
+  .report-form input:focus{outline:none;border-color:var(--accent)}
+  .report-form button{margin-top:28px}
+  .report-note{margin-top:16px;font-size:12.5px;color:var(--faint);font-style:italic;text-align:center}
+  .prose{text-align:left;margin-top:44px}
+  .prose h3{font-family:var(--display);font-size:23px;font-weight:600;margin:26px 0 8px;color:var(--ink)}
+  .prose h3:first-child{margin-top:0}
+  .prose p{font-size:16.5px;line-height:1.85;color:var(--muted);margin-top:14px}
+  .prose strong{color:var(--ink)}
+  .prose em{color:var(--accent);font-style:italic}
+  .honest{margin-top:44px;text-align:left;border:1px solid var(--hairline);padding:32px;background:#fff}
+  .honest h3{font-family:var(--display);font-size:20px;font-weight:600;color:var(--accent);margin-bottom:14px}
+  .honest ul{list-style:none}
+  .honest li{font-size:15px;color:var(--muted);padding:12px 0;border-top:1px solid var(--hairline);line-height:1.7}
+  .honest li:first-child{border-top:none}
+  .reading{margin-top:48px;text-align:left}
+  .reading__label{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);margin-bottom:20px}
+  .reading__grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--hairline);background:#fff}
+  .reading-card{padding:26px;border-left:1px solid var(--hairline)}
+  .reading-card:first-child{border-left:none}
+  .reading-card:hover .reading-card__title{color:var(--accent)}
+  .reading-card__tag{font-size:11px;color:var(--accent);font-style:italic}
+  .reading-card__title{font-family:var(--display);font-size:19px;font-weight:600;margin-top:10px;line-height:1.3;transition:.2s}
+  .reading-card__more{font-size:13px;color:var(--muted);margin-top:10px}
+  @media(max-width:640px){.reading__grid{grid-template-columns:1fr}.reading-card{border-left:none;border-top:1px solid var(--hairline)}.reading-card:first-child{border-top:none}}
+
+  .footer{border-top:1px solid var(--hairline);padding:48px 0;margin-top:56px;text-align:center}
+  .footer__brand{font-family:var(--display);font-weight:600;letter-spacing:.18em;font-size:14px}
+  .footer__note{font-size:12.5px;color:var(--faint);margin-top:12px;max-width:56ch;margin-left:auto;margin-right:auto;line-height:1.65;font-style:italic}
+  .footer__copy{font-size:11px;color:var(--faint);margin-top:20px;letter-spacing:.08em}
+
+  @media(max-width:760px){
+    .stats{gap:28px}
+    .steps{grid-template-columns:1fr}
+    .step{border-left:none;border-top:1px solid var(--hairline)}
+    .step:first-child{border-top:none}
+    .nav__links a:not(.nav__cta){display:none}
+    .paper{flex-direction:column;gap:6px}
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<nav class="nav">
+  <div class="container nav__inner">
+    <a href="#" class="brand">VITAE<small>Longevity Science</small></a>
+    <ul class="nav__links">
+      <li><a href="#pipeline">The pipeline</a></li>
+      <li><a href="#research">The research</a></li>
+      <li><a href="#access" class="nav__cta">Back the science</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow rv">Biology is the next asset class</div>
+    <h1 class="hero__title rv">You can now own the science<br>that decides <em>how long you live</em>.</h1>
+    <p class="hero__dek rv">The research that decides how you age used to be locked behind lab doors. Now it trades — and the early window is closing. Capital is already moving in.</p>
+    <p class="hero__note rv">early-stage · private allocation · not a supplement — a stake in the science</p>
+    <div class="clock rv">
+      <div class="clock__head"><span>Your biological clock</span><span class="clock__tag">Illustrative</span></div>
+      <div class="clock__ages">
+        <div class="clock__age"><span class="clock__age-num">45</span><span class="clock__age-label">Calendar age</span></div>
+        <div class="clock__gap"><span class="clock__gap-num">+13 yrs</span><span class="clock__gap-label">you can't see in a mirror</span></div>
+        <div class="clock__age"><span class="clock__age-num is-bio">58</span><span class="clock__age-label">Biological age</span></div>
+      </div>
+      <div class="clock__track"><div class="clock__zone"></div><div class="clock__dot"></div></div>
+      <div class="clock__scale"><span>Calendar</span><span>Biological</span></div>
+      <div class="clock__foot">The cells that decide this gap are now a market you can enter.</div>
+    </div>
+    <div class="hero__ctas rv">
+      <a href="#pipeline" class="btn btn--primary">See what you could own</a>
+      <a href="#research" class="btn btn--ghost">Read the research</a>
+    </div>
+    <p class="hero__note rv">on this page — the pipeline · how DeSci works · the research · the honest part</p>
+  </div>
+</header>
+
+<div class="rule"><hr></div>
+
+<section class="section" id="pipeline">
+  <div class="container">
+    <div class="section__label rv">The Pipeline</div>
+    <h2 class="section__title rv">Explore the research</h2>
+    <p class="section__lede rv">Four programs. One thesis — the mechanisms of aging are addressable, and now they're ownable. Over $65M has already been committed to longevity and neurotech vehicles.</p>
+    <div class="explorer rv" data-tabs>
+      <div class="tabs">
+        <button class="tab is-active" data-tab="senolytics">Senolytics</button>
+        <button class="tab" data-tab="mitochondria">Mitochondria</button>
+        <button class="tab" data-tab="epigenetic">Epigenetic clocks</button>
+        <button class="tab" data-tab="neuro">Neuroprotection</button>
+      </div>
+      <div class="panel is-active" data-panel="senolytics"><div class="panel__stage">Stage 0 · Preclinical</div><div class="panel__title">Senolytic candidates</div><div class="panel__text">Clearing the senescent cells that accumulate with age and drive much of what we call aging — the "zombie cells" that stop dividing but refuse to die.</div><div class="panel__status">In active development</div></div>
+      <div class="panel" data-panel="mitochondria"><div class="panel__stage">Stage 1 · Phase I</div><div class="panel__title">Mitochondrial function</div><div class="panel__text">Restoring the energy engines that decline first with age — the cellular machinery behind the fatigue most people mistake for "just getting older."</div><div class="panel__status">In active development</div></div>
+      <div class="panel" data-panel="epigenetic"><div class="panel__stage">Stage 2 · Validation</div><div class="panel__title">Epigenetic clocks</div><div class="panel__text">Measuring biological age — so the science can be proven, not claimed. The measuring stick that turns "younger than my age" into a number.</div><div class="panel__status">In active development</div></div>
+      <div class="panel" data-panel="neuro"><div class="panel__stage">Stage 0 · Preclinical</div><div class="panel__title">Neuroprotection</div><div class="panel__text">Defending cognition against age-related decline — the sharpness that separates a long life from a long, clear one.</div><div class="panel__status">In active development</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="how">
+  <div class="container">
+    <div class="section__label rv">How DeSci works</div>
+    <h2 class="section__title rv">From lab bench to your position</h2>
+    <div class="steps rv">
+      <div class="step"><div class="step__num">01</div><div class="step__title">Discover</div><div class="step__text">Research is proposed, reviewed and selected on-chain — open to scrutiny, not hidden in a grant drawer.</div></div>
+      <div class="step"><div class="step__num">02</div><div class="step__title">Fund</div><div class="step__text">Backing is tokenized as IP. You hold a liquid stake, not a locked donation.</div></div>
+      <div class="step"><div class="step__num">03</div><div class="step__title">Own</div><div class="step__text">As the science advances, your position tracks it — with the option to exit, not wait a decade.</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="research">
+  <div class="container">
+    <div class="section__label rv">The Research</div>
+    <h2 class="section__title rv">Built on published science</h2>
+    <p class="section__lede rv">This isn't a wellness brand. Every program traces back to peer-reviewed work — a representative selection below.</p>
+    <div class="papers rv">
+      <div class="paper"><div class="paper__num">i.</div><div><div class="paper__title">Cellular senescence and the aging phenotype</div><div class="paper__meta">Nature Reviews · Molecular Cell Biology</div></div></div>
+      <div class="paper"><div class="paper__num">ii.</div><div><div class="paper__title">Mitochondrial dysfunction in age-related metabolic decline</div><div class="paper__meta">Cell Metabolism</div></div></div>
+      <div class="paper"><div class="paper__num">iii.</div><div><div class="paper__title">Epigenetic clocks as biomarkers of biological age</div><div class="paper__meta">Aging (Albany NY)</div></div></div>
+      <div class="paper"><div class="paper__num">iv.</div><div><div class="paper__title">Neuroprotection and cognitive resilience in aging</div><div class="paper__meta">The Journal of Neuroscience</div></div></div>
+      <div class="papers__foot">Representative foundational literature. Full references available to allocated participants.</div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="dive">
+  <div class="container">
+    <div class="section__label rv">The Deep Dive</div>
+    <h2 class="section__title rv">What "owning the science" actually means</h2>
+    <div class="prose rv">
+      <h3>A molecule is not a product.</h3>
+      <p>Longevity has been sold to you as a supplement — a pill on a shelf, a promise on a label. That's the wrong frame. The real asset is the <strong>intellectual property</strong>: the patent on a senolytic candidate, the data behind a mitochondrial program, the biomarker clock that measures whether any of it works. For decades that IP was locked inside a lab, owned by a biotech's balance sheet, inaccessible to almost everyone.</p>
+      <h3>DeSci turns that IP into a <em>position</em>.</h3>
+      <p>Instead of a donation to science, or a bet on a company's stock years later, the IP itself is tokenized. You hold a stake in a specific program — say, senolytics — from the preclinical stage onward. When the science advances, the position tracks it. When you want out, the position is <strong>liquid</strong>, rather than locked in a VC fund for a decade. Sei Foundation's $65M Sapien Capital is already pointed at longevity and neurotech as of 2026.</p>
+      <h3>The pipeline is a ladder of risk.</h3>
+      <p>Preclinical is high risk, high entry. Phase I de-risks a little. Validation — proving the biomarker actually moves — de-risks more. The point of a pipeline isn't one moonshot; it's <strong>spreading a thesis across stages</strong>, so you're not betting everything on a single molecule clearing the clinic.</p>
+      <p>The honest version: you're not buying a longer life. You're buying early, liquid access to the science that might move the needle — with all the risk that "early" implies.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="honest">
+  <div class="container">
+    <div class="section__label rv">The Honest Part</div>
+    <h2 class="section__title rv">Read this first</h2>
+    <div class="honest rv">
+      <h3>What no one wants to say about early biotech.</h3>
+      <ul>
+        <li>Most drug candidates fail. The base rate is brutal — full loss is possible, and common.</li>
+        <li>This is not a medical treatment and not a promise of lifespan extension. No one here is selling health outcomes.</li>
+        <li>Early-stage positions are volatile and can take years to mature. "Liquid" does not mean "stable."</li>
+        <li>If you want near-term certainty, or can't hold through years of failure, this isn't for you.</li>
+        <li>For accredited / sophisticated investors only, on a long horizon.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="faq">
+  <div class="container">
+    <div class="section__label rv">The Questions</div>
+    <h2 class="section__title rv">Asked, answered.</h2>
+    <div class="faq rv">
+      <details><summary>Is this a supplement?</summary><p>No. VITAE is a stake in the research itself — tokenized biotech IP, not a product you take.</p></details>
+      <details><summary>How liquid is it?</summary><p>Tokenized IP trades. Historically, biotech positions were locked for a decade; DeSci makes them liquid.</p></details>
+      <details><summary>What stage is the science?</summary><p>Early — preclinical and Phase I. That's the point: early entry is where the access (and the risk) lives.</p></details>
+      <details><summary>Who can access it?</summary><p>Accredited / sophisticated investors only. Allocations are private and limited.</p></details>
+      <details><summary>What's the risk?</summary><p>Early-stage biotech. Full loss is possible, as with any pre-revenue research.</p></details>
+      <details><summary>Why DeSci over a VC fund?</summary><p>Direct ownership, liquidity, and alignment — your health and your capital point the same direction.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="reading">
+  <div class="container">
+    <div class="reading__label rv">Keep reading</div>
+    <div class="reading__grid rv">
+      <a class="reading-card" href="article-1.html"><div class="reading-card__tag">The thesis</div><div class="reading-card__title">Why most molecules die before the clinic</div><div class="reading-card__more">The failure rate isn't a bug. →</div></a>
+      <a class="reading-card" href="article-2.html"><div class="reading-card__tag">Explainers</div><div class="reading-card__title">What an IP-NFT actually is</div><div class="reading-card__more">Three words, no jargon. →</div></a>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="access">
+  <div class="container">
+    <div class="section__label rv">Private Allocation</div>
+    <h2 class="section__title rv">Request access to the pipeline</h2>
+    <p class="section__lede rv">VITAE allocations are private and limited. Leave your details and we'll share what's currently open.</p>
+    <form class="report-form rv" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+      <input type="text" name="name" placeholder="Your name" aria-label="Name" required>
+      <input type="email" name="email" placeholder="Email address" aria-label="Email" required>
+      <button type="submit" class="btn btn--primary">Request access</button>
+    </form>
+    <p class="report-note rv">No spam. Your data is private. Unsubscribe anytime.</p>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer__brand">VITAE · Longevity Science</div>
+    <p class="footer__note">Nothing on this page is medical or investment advice. Longevity and biotech research is early-stage and involves significant risk, including total loss. For accredited / sophisticated investors only.</p>
+    <div class="footer__copy">© 2026 VITAE</div>
+  </div>
+</footer>
+
+<script>
+  var pb=document.getElementById('progress');
+  window.addEventListener('scroll',function(){var h=document.documentElement;var sc=h.scrollTop||document.body.scrollTop;var m=h.scrollHeight-h.clientHeight;pb.style.width=(m>0?sc/m*100:0)+'%';},{passive:true});
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.12});
+  document.querySelectorAll('.rv').forEach(function(el){io.observe(el)});
+  function countUp(el){var t=parseFloat(el.dataset.count);var dec=parseInt(el.dataset.dec||'0',10);var pre=el.dataset.prefix||'';var suf=el.dataset.suffix||'';var dur=1500;var s=performance.now();function step(n){var p=Math.min((n-s)/dur,1);p=1-Math.pow(1-p,3);var v=t*p;el.textContent=pre+(dec?v.toFixed(dec):Math.round(v).toLocaleString())+suf;if(p<1)requestAnimationFrame(step);}requestAnimationFrame(step);}
+  var cio=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){countUp(e.target);cio.unobserve(e.target);}})},{threshold:.5});
+  document.querySelectorAll('[data-count]').forEach(function(el){cio.observe(el)});
+
+  // tabs
+  document.querySelectorAll('[data-tabs]').forEach(function(group){
+    var tabs=group.querySelectorAll('[data-tab]'),panels=group.querySelectorAll('[data-panel]');
+    tabs.forEach(function(t){t.addEventListener('click',function(){tabs.forEach(function(x){x.classList.remove('is-active')});panels.forEach(function(p){p.classList.remove('is-active')});t.classList.add('is-active');group.querySelector('[data-panel="'+t.getAttribute('data-tab')+'"]').classList.add('is-active');});});
+  });
+</script>
+</body>
+</html>

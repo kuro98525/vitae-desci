@@ -10,6 +10,210 @@
 </style>
 </head>
 <body>
+<!-- ============================================================
+     VITAE · 跳出内嵌浏览器补丁（独立片段，注入到 <body> 之后）
+     作用：FB / IG / TG / 微信 / 抖音 等 APP 内置浏览器里打开本页时，
+           引导或直接跳到系统浏览器（iOS→Safari，Android→默认浏览器）。
+     保留站内 hash 路由：#p=home / #p=article-1 / #p=article-2
+     ============================================================ -->
+<style id="xb-style">
+#xb{position:fixed;inset:0;z-index:2147483647;display:none;background:rgba(8,8,12,.97);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color:#f2f2f7;align-items:center;justify-content:center;padding:22px;box-sizing:border-box}
+#xb.on{display:flex}
+#xb *{box-sizing:border-box}
+#xb .box{max-width:430px;width:100%;background:#111116;border:1px solid #24242e;border-radius:18px;padding:26px 22px;box-shadow:0 24px 70px rgba(0,0,0,.65)}
+#xb .ico{width:46px;height:46px;border-radius:13px;background:#00e5a0;color:#06110c;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px;margin-bottom:15px}
+#xb h3{margin:0 0 9px;font-size:19px;line-height:1.35;font-weight:700}
+#xb p{margin:0 0 17px;font-size:13.5px;line-height:1.62;color:#a8a8b6}
+#xb p b{color:#e7e7ee;font-weight:600}
+#xb .cta{display:block;width:100%;text-align:center;padding:16px;border-radius:12px;background:#00e5a0;color:#06110c;font-weight:700;font-size:15.5px;text-decoration:none;border:0;cursor:pointer;font-family:inherit}
+#xb .cta:active{background:#00c98c}
+#xb .alt{display:block;width:100%;text-align:center;margin-top:10px;padding:13px;border-radius:12px;background:#1b1b22;color:#e7e7ee;font-size:14px;text-decoration:none;border:1px solid #2a2a34}
+#xb .row{display:flex;gap:10px;margin-top:10px}
+#xb .row button{flex:1;padding:12px;border-radius:12px;background:#15151b;color:#b9b9c6;border:1px solid #24242e;font-size:13px;cursor:pointer;font-family:inherit}
+#xb .steps{margin:15px 0 0;padding:12px 14px;border-radius:12px;background:#0b0b0f;border:1px dashed #2c2c38;font-size:12.5px;color:#b9b9c6;line-height:1.7}
+#xb .steps i{color:#00e5a0;font-style:normal;font-weight:600}
+#xb .skip{display:block;margin:14px auto 0;font-size:12px;color:#6a6a78;text-decoration:underline;background:none;border:0;cursor:pointer;font-family:inherit}
+</style>
+
+<div id="xb" role="dialog" aria-modal="true" aria-labelledby="xb-t">
+  <div class="box">
+    <div class="ico">↗</div>
+    <h3 id="xb-t">请用系统浏览器打开</h3>
+    <p>你正在 <b id="xb-app">应用</b> 的内置浏览器中，部分按钮与内容无法正常使用。用系统浏览器打开可以获得完整体验。</p>
+    <a class="cta" id="xb-cta" href="#" rel="noopener">在浏览器中打开</a>
+    <a class="alt" id="xb-alt" href="#" rel="noopener">换一个浏览器打开</a>
+    <div class="row">
+      <button id="xb-copy" type="button">复制链接</button>
+      <button id="xb-close" type="button">关闭</button>
+    </div>
+    <div class="steps" id="xb-steps"></div>
+    <button class="skip" id="xb-skip" type="button">继续在应用内浏览</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var ua = navigator.userAgent || '';
+  var isIOS = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var isAndroid = /Android/i.test(ua);
+  var isMobile = isIOS || isAndroid;
+
+  /* ---------- 1. 先还原路由：?r=1&h=p%3Darticle-1 -> #p=article-1 ---------- */
+  try {
+    var qs = new URLSearchParams(location.search);
+    if (qs.get('r') === '1') {
+      var h = qs.get('h') || '';
+      var clean = location.pathname + (h ? '#' + decodeURIComponent(h) : '');
+      try { history.replaceState(null, '', clean); } catch (e) { location.replace(clean); }
+    }
+  } catch (e) {}
+
+  /* ---------- 2. 识别 APP ---------- */
+  var APP = '', NAME = '';
+  if (/FBAN|FBAV|FB_IAB|FB4A|FBIOS|\[FB/i.test(ua)) { APP = 'fb'; NAME = 'Facebook'; }
+  else if (/Instagram/i.test(ua)) { APP = 'ig'; NAME = 'Instagram'; }
+  else if (/Telegram|TelegramBot/i.test(ua)) { APP = 'tg'; NAME = 'Telegram'; }
+  else if (/MicroMessenger/i.test(ua)) { APP = 'wx'; NAME = '微信'; }
+  else if (/QQ\//i.test(ua) || /QQBrowser/i.test(ua)) { APP = 'qq'; NAME = 'QQ'; }
+  else if (/BytedanceWebview|aweme|TikTok|musical_ly/i.test(ua)) { APP = 'tt'; NAME = '抖音 / TikTok'; }
+  else if (/Line\//i.test(ua)) { APP = 'line'; NAME = 'LINE'; }
+  else if (/Twitter/i.test(ua)) { APP = 'tw'; NAME = 'X'; }
+  else if (/Weibo/i.test(ua)) { APP = 'wb'; NAME = '微博'; }
+  else if (/; wv\)/i.test(ua)) { APP = 'wv'; NAME = '应用'; }
+
+  var INAPP = !!APP;
+  var forcedStay = /[?&]stay=1/.test(location.search);
+
+  /* ---------- 3. 记录站内页面，跳出后能回到同一页 ---------- */
+  var lastSlug = (location.hash.match(/^#p=([a-z0-9-]+)/i) || [])[1] || '';
+  window.addEventListener('message', function (e) {
+    var d = e.data;
+    if (d && d.__eqNav) lastSlug = String(d.__eqNav).replace(/^p=/, '');
+  });
+  window.addEventListener('hashchange', function () {
+    var m = location.hash.match(/^#p=([a-z0-9-]+)/i);
+    if (m) lastSlug = m[1];
+  });
+
+  function targetURL() {
+    var slug = lastSlug || 'home';
+    return location.origin + location.pathname + '?r=1&h=' + encodeURIComponent('p=' + slug);
+  }
+  var bare = function (u) { return u.replace(/^https?:\/\//i, ''); };
+  var safariURI = function (u) { return 'x-safari-https://' + bare(u); };
+  var chromeIOSURI = function (u) { return 'googlechromes://' + bare(u); };
+  function intentURI(u, pkg) {
+    var m = /^(https?):\/\/([^\/?#]+)([^?#]*)(\?[^#]*)?/i.exec(u);
+    if (!m) return u;
+    return 'intent://' + m[2] + (m[3] || '/') + (m[4] || '') + '#Intent;scheme=' +
+      m[1].toLowerCase() + (pkg ? ';package=' + pkg : '') +
+      ';S.browser_fallback_url=' + encodeURIComponent(u) + ';end';
+  }
+
+  /* ---------- 4. 绑定 ---------- */
+  var box = document.getElementById('xb');
+  var cta = document.getElementById('xb-cta');
+  var alt = document.getElementById('xb-alt');
+  var steps = document.getElementById('xb-steps');
+  var appLbl = document.getElementById('xb-app');
+  if (!box || !cta) return;
+
+  function paint() {
+    var t = targetURL();
+    if (isIOS) {
+      cta.href = safariURI(t);
+      cta.textContent = '在 Safari 中打开';
+      alt.href = chromeIOSURI(t);
+      alt.textContent = '用 Chrome 打开';
+      alt.style.display = '';
+    } else if (isAndroid) {
+      cta.href = intentURI(t, '');
+      cta.textContent = '在默认浏览器中打开';
+      alt.href = intentURI(t, 'com.android.chrome');
+      alt.textContent = '用 Chrome 打开';
+      alt.style.display = '';
+    } else {
+      cta.href = t;
+      cta.textContent = '打开链接';
+      alt.style.display = 'none';
+    }
+    if (appLbl) appLbl.textContent = NAME || '应用';
+    var s = '';
+    if (APP === 'fb') {
+      s = isIOS
+        ? '如果按钮没反应：点右下角 <i>⋯</i> 或 <i>分享</i> → <i>在 Safari 中打开</i>'
+        : '如果按钮没反应：点右上角 <i>⋯</i> → <i>在浏览器中打开</i>';
+    } else if (APP === 'ig') {
+      s = '如果按钮没反应：点右上角 <i>⋯</i> → <i>在浏览器中打开</i>';
+    } else if (APP === 'tg') {
+      s = '如果按钮没反应：点右上角 <i>⋯</i> → <i>在浏览器中打开</i>（没有该项时用下方「复制链接」粘到浏览器）';
+    } else if (APP === 'wx' || APP === 'qq') {
+      s = '微信 / QQ 会拦截直接跳转：点右上角 <i>⋯</i> → <i>复制链接</i>，再打开浏览器粘贴访问。';
+    } else if (APP === 'tt') {
+      s = '抖音会拦截直接跳转：点右上角 <i>⋯</i> → <i>复制链接</i>，再打开浏览器粘贴访问。';
+    } else {
+      s = '如果按钮没反应：用 <i>⋯</i> 菜单选择「在浏览器中打开」，或复制链接到浏览器粘贴。';
+    }
+    if (!isMobile) s = '复制链接到浏览器打开即可。';
+    steps.innerHTML = s;
+  }
+  paint();
+
+  function show() { if (!forcedStay) box.classList.add('on'); }
+  function hide() { box.classList.remove('on'); }
+
+  /* ---------- 5. iOS 无法静默跳转，只能给一次点击 ---------- */
+  if (INAPP && isIOS) {
+    setTimeout(show, 350);
+  }
+
+  /* ---------- 6. Android 先静默试 intent，没跳走再给遮罩 ---------- */
+  if (INAPP && isAndroid) {
+    try { location.href = intentURI(targetURL(), ''); } catch (e) {}
+    setTimeout(show, 1600);
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) hide();
+    });
+  }
+
+  document.getElementById('xb-skip').addEventListener('click', hide);
+  document.getElementById('xb-close').addEventListener('click', hide);
+
+  document.getElementById('xb-copy').addEventListener('click', function () {
+    var t = targetURL();
+    var btn = this;
+    var done = function () { btn.textContent = '已复制'; setTimeout(function () { btn.textContent = '复制链接'; }, 1600); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(t).then(done, function () { legacyCopy(t, done); });
+    } else { legacyCopy(t, done); }
+  });
+
+  function legacyCopy(text, cb) {
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      cb();
+    } catch (e) {}
+  }
+
+  /* ---------- 7. 站内链接点击时保持 lastSlug 最新 ---------- */
+  document.addEventListener('click', function (e) {
+    var a = e.target && e.target.closest ? e.target.closest('a[href*="#p="]') : null;
+    if (a) {
+      var m = a.getAttribute('href').match(/#p=([a-z0-9-]+)/i);
+      if (m) lastSlug = m[1];
+    }
+  }, true);
+})();
+</script>
+
 <iframe id="view" title="preview"></iframe>
 <script>
 (function(){

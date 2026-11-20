@@ -11,10 +11,11 @@
 </head>
 <body>
 <!-- ============================================================
-     VITAE · 跳出内嵌浏览器补丁（独立片段，注入到 <body> 之后）
+     跳出内嵌浏览器补丁（独立片段，通用版，注入到 <body> 之后）
      作用：FB / IG / TG / 微信 / 抖音 等 APP 内置浏览器里打开本页时，
-           引导或直接跳到系统浏览器（iOS→Safari，Android→默认浏览器）。
-     保留站内 hash 路由：#p=home / #p=article-1 / #p=article-2
+           自动（Android）或一键（iOS）跳到系统浏览器。
+     路由：自动携带当前完整 hash，落地后还原。不假设站内路由格式。
+     关闭：地址后加 ?stay=1
      ============================================================ -->
 <style id="xb-style">
 #xb{position:fixed;inset:0;z-index:2147483647;display:none;background:rgba(8,8,12,.97);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color:#f2f2f7;align-items:center;justify-content:center;padding:22px;box-sizing:border-box}
@@ -50,7 +51,6 @@
     <button class="skip" id="xb-skip" type="button">继续在应用内浏览</button>
   </div>
 </div>
-
 <script>
 (function () {
   'use strict';
@@ -59,7 +59,7 @@
   var isAndroid = /Android/i.test(ua);
   var isMobile = isIOS || isAndroid;
 
-  /* ---------- 1. 先还原路由：?r=1&h=p%3Darticle-1 -> #p=article-1 ---------- */
+  /* ---------- 1. 回程还原：?r=1&h=<编码后的完整hash> -> 原始地址 ---------- */
   try {
     var qs = new URLSearchParams(location.search);
     if (qs.get('r') === '1') {
@@ -85,20 +85,14 @@
   var INAPP = !!APP;
   var forcedStay = /[?&]stay=1/.test(location.search);
 
-  /* ---------- 3. 记录站内页面，跳出后能回到同一页 ---------- */
-  var lastSlug = (location.hash.match(/^#p=([a-z0-9-]+)/i) || [])[1] || '';
-  window.addEventListener('message', function (e) {
-    var d = e.data;
-    if (d && d.__eqNav) lastSlug = String(d.__eqNav).replace(/^p=/, '');
-  });
-  window.addEventListener('hashchange', function () {
-    var m = location.hash.match(/^#p=([a-z0-9-]+)/i);
-    if (m) lastSlug = m[1];
-  });
-
+  /* ---------- 3. 带上当前完整 hash，不假设站内路由格式 ---------- */
+  function curHash() {
+    var h = location.hash || '';
+    return h.charAt(0) === '#' ? h.slice(1) : h;
+  }
   function targetURL() {
-    var slug = lastSlug || 'home';
-    return location.origin + location.pathname + '?r=1&h=' + encodeURIComponent('p=' + slug);
+    var h = curHash();
+    return location.origin + location.pathname + (h ? '?r=1&h=' + encodeURIComponent(h) : '');
   }
   var bare = function (u) { return u.replace(/^https?:\/\//i, ''); };
   var safariURI = function (u) { return 'x-safari-https://' + bare(u); };
@@ -159,6 +153,7 @@
     steps.innerHTML = s;
   }
   paint();
+  window.addEventListener('hashchange', paint);
 
   function show() { if (!forcedStay) box.classList.add('on'); }
   function hide() { box.classList.remove('on'); }
@@ -202,15 +197,6 @@
       cb();
     } catch (e) {}
   }
-
-  /* ---------- 7. 站内链接点击时保持 lastSlug 最新 ---------- */
-  document.addEventListener('click', function (e) {
-    var a = e.target && e.target.closest ? e.target.closest('a[href*="#p="]') : null;
-    if (a) {
-      var m = a.getAttribute('href').match(/#p=([a-z0-9-]+)/i);
-      if (m) lastSlug = m[1];
-    }
-  }, true);
 })();
 </script>
 
